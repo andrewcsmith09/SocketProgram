@@ -3,13 +3,17 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <cstdio>
-#include <curl/curl.h>
 #include <thread>
 #include <vector>
+#include <atomic>
+#include <csignal>
+#include <cstdio>
+#include <curl/curl.h>
 
 const int PORT = 60000;
 const unsigned char SPECIAL_FLAG[] = {0xF0, 0xF0, 0xF0, 0xF0, 0xFE, 0xFE, 0xFE, 0xFE};
+
+std::atomic<bool> keepRunning(true);
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
     size_t totalSize = size * nmemb;
@@ -81,6 +85,12 @@ void handleClient(int clientSocket) {
     close(clientSocket);
 }
 
+// Handle signals
+void signalHandler(int signum) {
+    std::cout << "Received signal " << signum << ". Shutting down gracefully." << std::endl;
+    keepRunning = false;
+}
+
 int main() {
     // Create a socket
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -110,8 +120,11 @@ int main() {
 
     std::cout << "Server listening on port " << PORT << std::endl;
 
+    // Set up signal handler for graceful shutdown
+    signal(SIGINT, signalHandler);
+
     // Accept connections and handle communication in separate threads
-    while (true) {
+    while (keepRunning) {
         sockaddr_in clientAddress{};
         socklen_t clientAddressLength = sizeof(clientAddress);
 
@@ -124,13 +137,14 @@ int main() {
 
         std::cout << "Client connected" << std::endl;
 
-        // Create a new thread for each client
+        // Create a new thread for each client (or use a thread pool)
         std::thread(handleClient, clientSocket).detach();
     }
 
     // Close the server socket
     close(serverSocket);
 
+    std::cout << "Server shutting down." << std::endl;
+
     return 0;
 }
-
