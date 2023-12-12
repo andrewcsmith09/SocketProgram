@@ -1,26 +1,24 @@
 // CODE FOR CLIENT - ANDREW SMITH
 #include <iostream>
-#include <fstream>
 #include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <fstream>
 
-const int PORT = 60000;
-const unsigned char SPECIAL_FLAG[] = {0xF0, 0xF0, 0xF0, 0xF0, 0xFE, 0xFE, 0xFE, 0xFE};
+const int SERVER_PORT = 60000;  // Server's listening port
+const int CLIENT_PORT = 60001;  // Client's source port
+const unsigned char SPECIAL_FLAG[] = {0xF0, 0xF0, 0xF0, 0xF0, 0xFE, 0xFE, 0xFE, 0xFE}; // Special flag sent before URL
 
-void printAndSaveWebpage(const char* webpageContent, size_t contentSize) {
-    // Print the webpage content
-    std::cout << "Received webpage content:\n" << webpageContent << std::endl;
+// Check for correct # of arguments
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <server_ip>" << std::endl;
+        return -1;
+    }
 
-    // Save the webpage content to a local file
-    std::ofstream outputFile("webpage_content.html", std::ios::binary);
-    outputFile.write(webpageContent, contentSize);
-    outputFile.close();
+    // Set server address to entered argument
+    const char *serverIP = argv[1];
 
-    std::cout << "Webpage content saved to 'webpage_content.html'" << std::endl;
-}
-
-int main() {
     // Create a socket
     int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (clientSocket == -1) {
@@ -28,11 +26,17 @@ int main() {
         return -1;
     }
 
+    // Set up client address
+    sockaddr_in clientAddress{};
+    clientAddress.sin_family = AF_INET;
+    clientAddress.sin_port = htons(CLIENT_PORT);  // Client's source port
+    inet_pton(AF_INET, "127.0.0.1", &clientAddress.sin_addr); // This can be any valid local IP address
+
     // Set up server address
     sockaddr_in serverAddress{};
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(PORT);
-    inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr);
+    serverAddress.sin_port = htons(SERVER_PORT);
+    inet_pton(AF_INET, serverIP, &serverAddress.sin_addr);
 
     // Connect to the server
     if (connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
@@ -42,7 +46,7 @@ int main() {
     }
 
     // Assemble the command string
-    const char* url = "https://www2.brockport.edu/";
+    const char* url = "https://www.wikipedia.org/"; // Website to be retrieved
     char commandString[1024];
     memcpy(commandString, SPECIAL_FLAG, sizeof(SPECIAL_FLAG));
     size_t urlLength = strlen(url);
@@ -58,8 +62,14 @@ int main() {
     if (bytesRead <= 0) {
         perror("Error receiving data");
     } else {
-        // Call the function to print and save the webpage content
-        printAndSaveWebpage(buffer, static_cast<size_t>(bytesRead));
+        // Print the received webpage content to the console
+        std::cout << "Received webpage content:\n" << buffer << std::endl;
+
+        // Save the received webpage content to a local file
+        std::ofstream outputFile("received_webpage.html", std::ios::out | std::ios::binary);
+        outputFile.write(buffer, bytesRead);
+        outputFile.close();
+        std::cout << "Webpage content saved to 'received_webpage.html'" << std::endl;
     }
 
     // Close the socket
@@ -67,4 +77,3 @@ int main() {
 
     return 0;
 }
-
