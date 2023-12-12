@@ -4,7 +4,7 @@
 
 This project consists of a simple client-server architecture for fetching webpage content. 
 The client sends a command to the server, which fetches the content of a specified webpage using libcurl and sends it back to the client.
-This project was created for a Network & Internet Applications class at SUNY Brockport.
+This project was created for a Network & Internet Applications class at SUNY Brockport. Hello, Dr. Yu!
 
 ## Prerequisites
 
@@ -36,37 +36,42 @@ This project was created for a Network & Internet Applications class at SUNY Bro
    ./server
    ```
 
-4. Run the client
+4. Run the client (Use 127.0.0.1 for local machine or IP of server machine for LAN)
 
    ```bash
-   ./client
+   ./client <server_ip>
    ```
 
 ## Usage
 
-The client sends a command to the server with a specified URL.  
-The server fetches the webpage content using libcurl.  
-The server sends the webpage content back to the client.  
-The client prints and saves the webpage content.
+- The client sends a command to the server with a specified URL.  
+- The server fetches the webpage content using libcurl.  
+- The server sends the webpage content back to the client.  
+- The client prints and saves the webpage content.
+
+## Optional Functionality
+
+- The server handles multiple clients concurrently using multi-threading.
+
 
 ## Project Structure
 
-client.cpp: Implementation of the client program.  
-server.cpp: Implementation of the server program.  
-CMakeLists.txt: CMake configuration file for building the project.  
+- client.cpp: Implementation of the client program.  
+- server.cpp: Implementation of the server program.  
+- CMakeLists.txt: CMake configuration file for building the project.  
 
 ## Dependencies
 
-C++11  
-libcurl (Make sure it's installed on your system)
+- C++11  
+- libcurl (Make sure it's installed on your system)
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
+- Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## License
 
-This project is licensed under the MIT License.
+- This project is licensed under the MIT License.
 
 
 
