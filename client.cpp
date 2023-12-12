@@ -1,4 +1,4 @@
-// CODE FOR CLIENT SERVER - ANDREW SMITH
+// CODE FOR CLIENT - ANDREW SMITH
 #include <iostream>
 #include <fstream>
 #include <cstring>
